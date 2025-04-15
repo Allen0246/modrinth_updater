@@ -83,7 +83,7 @@ def get_current_fabric_version(path = default_minecraft_path):
         error = (f'Error reading launcher_profiles.json: {e}')
         return error
 
-def get_current_loaders(path = default_minecraft_path):
+def get_current_loader(path = default_minecraft_path):
     """
     Retrieves the current Minecraft loader (fabric, forge, or quilt) by reading the launcher_profiles.json file.
     
@@ -188,22 +188,21 @@ def get_latest_mod_versions(project_id):
     """
 
     url = f'https://api.modrinth.com/v2/project/{project_id}'
-    response = requests.get(url, timeout=15)
     try:
-        if response.status_code == 200:
-            data = response.json()
-            filtered_latest_mod_versions = [v for v in data['game_versions'] if 'w' not in v]
-            return filtered_latest_mod_versions[-1]
-        elif response.status_code == 404:
-            print (f'❌ Cannot find the mod witht the project id: {project_id}')
-        else:
-            print(f'⚠️ Error: {response.status_code}')
-            print(response.text)
-            return response
+        response = requests.get(url, timeout=15)
     except requests.exceptions.Timeout:
         print('The request timed out!')
     except requests.exceptions.RequestException as e:
         print(f'An error occurred: {e}')
+    if response.status_code == 200:
+        data = response.json()
+        filtered_latest_mod_versions = [v for v in data['game_versions'] if 'w' not in v]
+        return filtered_latest_mod_versions[-1]
+    elif response.status_code == 404:
+        print (f'❌ Cannot find the mod witht the project id: {project_id}')
+    else:
+        print(f'⚠️ Error: {response.status_code}')
+        return response
 
 def get_local_mod_version(hash):
     """
@@ -218,19 +217,19 @@ def get_local_mod_version(hash):
     url = f'https://api.modrinth.com/v2/version_file/{hash}'
     try:
         response = requests.get(url, timeout=15)
-        if response.status_code == 200:
-            data = response.json()
-            return data['game_versions']
-        elif response.status_code == 404:
-            print (f'❌ Cannot find the mod with the hash: {hash}')
-        else:
-            print(f'⚠️ Error: {response.status_code}')
-            print(response.text)
-            return response
     except requests.exceptions.Timeout:
         print('The request timed out!')
     except requests.exceptions.RequestException as e:
         print(f'An error occurred: {e}')
+    if response.status_code == 200:
+        data = response.json()
+        return data['game_versions']
+    elif response.status_code == 404:
+        print (f'❌ Cannot find the mod with the hash: {hash}')
+    else:
+        print(f'⚠️ Error: {response.status_code}')
+        print(response.text)
+        return response
 
 def download_mod(url, save_folder, mod_name=None):
     """
@@ -250,17 +249,16 @@ def download_mod(url, save_folder, mod_name=None):
     save_path = os.path.join(save_folder, mod_name)
     try:
         response = requests.get(url, stream=True, timeout=15)
-        response.raise_for_status()  # Raise error if download failed
-
-        with open(save_path, 'wb') as file:
-            for chunk in response.iter_content(chunk_size=8192):
-                file.write(chunk)
-        return save_path
     except requests.exceptions.Timeout:
         print("The request timed out!")
     except Exception as e:
         error = (f'Error downloading file: {e}')
         return error
+
+    with open(save_path, 'wb') as file:
+        for chunk in response.iter_content(chunk_size=8192):
+            file.write(chunk)
+    return save_path
 
 def fix_version_number(game_versions):
     """
@@ -303,55 +301,57 @@ def check_updateable_mods(mod_path, game_versions=None, loaders=None):
         loader_version = get_current_fabric_version()
     if loaders:
         body['loaders'] = [loaders]
+    else:
+        loaders = get_current_loader()
     try:
-        response = requests.post(url, json=body, headers=headers)
-        mod_name = os.path.basename(mod_path)
-        if response.status_code == 200:
-            data = response.json()
-            latest_mod_version = fix_version_number(data['game_versions'])
-            curret_mod_version = fix_version_number(get_local_mod_version(sha1_hash))
-            if latest_mod_version == curret_mod_version:
-                print (f'✅ Your mod is on the latest release: {mod_name}! Your loader is {loaders}-{loader_version}.')
-            elif latest_mod_version > curret_mod_version:
-                print('🚀 A newer version is available of this mod!')
-                print(f'Name: {mod_name}')
-                backup_folder = os.path.join(default_minecraft_path, 'mods', 'backup' )
-                backup_path = os.path.join(default_minecraft_path, 'mods', 'backup', os.path.basename(mod_path))
-                mods_folder = os.path.join(default_minecraft_path, 'mods')
-                if not os.path.exists(backup_folder):
-                    os.makedirs(backup_folder)
-                try:
-                    download_mod(data['files'][0]['url'],mods_folder)
-                    print('✅ Latest version of the mod has been downloaded!')
-                    try:
-                        shutil.move(mod_path, backup_path)
-                        print('✅ Old mod file moved to the backup folder!')
-                    except Exception as e:
-                        error = (f'Error moving file: {e}')
-                        return error
-                except Exception as e:
-                    error = (f'Error downloading file: {e}')
-                    return error
-
-        elif response.status_code == 404:
-            wait_for_update_folder = os.path.join(default_minecraft_path, 'mods', 'wait_for_update' )
-            wait_for_update_path = os.path.join(default_minecraft_path, 'mods', 'wait_for_update', os.path.basename(mod_path) )
-            if not os.path.exists(wait_for_update_folder):
-                    os.makedirs(wait_for_update_folder)
-            try:
-                shutil.move(mod_path, wait_for_update_path)
-                print('✅ Mod moved to wait_for_update folder because of incompatibility!')
-            except Exception as e:
-                error = (f'Error moving file: {e}')
-                return error
-            print (f'❌ There is no update for {mod_name} your loader is {loaders}-{game_versions}.')
-        else:
-            print(f'⚠️ Error: {response.status_code}')
-            print(response.text)
+        response = requests.post(url, json=body, headers=headers, timeout=15)
     except requests.exceptions.Timeout:
         print('The request timed out!')
     except requests.exceptions.RequestException as e:
         print(f'An error occurred: {e}')
+    mod_name = os.path.basename(mod_path)
+    if response.status_code == 200:
+        data = response.json()
+        latest_mod_version = fix_version_number(data['game_versions'])
+        curret_mod_version = fix_version_number(get_local_mod_version(sha1_hash))
+        if latest_mod_version == curret_mod_version:
+            print (f'✅ Your mod is on the latest release: {mod_name}! Your loader is {loaders}-{loader_version}.')
+        elif latest_mod_version > curret_mod_version:
+            print('🚀 A newer version is available of this mod!')
+            print(f'Name: {mod_name}')
+            backup_folder = os.path.join(default_minecraft_path, 'mods', 'backup' )
+            backup_path = os.path.join(default_minecraft_path, 'mods', 'backup', os.path.basename(mod_path))
+            mods_folder = os.path.join(default_minecraft_path, 'mods')
+            if not os.path.exists(backup_folder):
+                os.makedirs(backup_folder)
+            try:
+                download_mod(data['files'][0]['url'],mods_folder)
+                print('✅ Latest version of the mod has been downloaded!')
+                try:
+                    shutil.move(mod_path, backup_path)
+                    print('✅ Old mod file moved to the backup folder!')
+                except Exception as e:
+                    error = (f'Error moving file: {e}')
+                    return error
+            except Exception as e:
+                error = (f'Error downloading file: {e}')
+                return error
+
+    elif response.status_code == 404:
+        wait_for_update_folder = os.path.join(default_minecraft_path, 'mods', 'wait_for_update' )
+        wait_for_update_path = os.path.join(default_minecraft_path, 'mods', 'wait_for_update', os.path.basename(mod_path) )
+        if not os.path.exists(wait_for_update_folder):
+                os.makedirs(wait_for_update_folder)
+        try:
+            shutil.move(mod_path, wait_for_update_path)
+            print('✅ Mod moved to wait_for_update folder because of incompatibility!')
+        except Exception as e:
+            error = (f'Error moving file: {e}')
+            return error
+        print (f'❌ There is no update for {mod_name} your loader is {loaders}-{game_versions}.')
+    else:
+        print(f'⚠️ Error: {response.status_code}')
+        print(response.text)
 
 def check_update(mod_path, game_versions=None, loaders=None):
     """
@@ -382,44 +382,46 @@ def check_update(mod_path, game_versions=None, loaders=None):
         loader_version = get_current_fabric_version()
     if loaders:
         body['loaders'] = [loaders]
+    else:
+        loaders = get_current_loader()
     try:
         response = requests.post(url, json=body, headers=headers, timeout=15)
-        mod_name = os.path.basename(mod_path)
-        if response.status_code == 200:
-            data = response.json()
-            latest_mod_version = fix_version_number(data['version_number'])
-            curret_mod_version = fix_version_number(get_local_mod_version(sha1_hash))
-            if latest_mod_version == curret_mod_version:
-                print (f'✅ Your mod is on the latest release: {mod_name}! Your loader is {loaders}-{loader_version}.')
-            elif latest_mod_version > curret_mod_version:
-                print('🚀 A newer version is available of this mod!')
-                print(f'Name: {mod_name}')
-                backup_folder = os.path.join(default_minecraft_path, 'mods', 'backup' )
-                backup_path = os.path.join(default_minecraft_path, 'mods', 'backup', os.path.basename(mod_path))
-                mods_folder = os.path.join(default_minecraft_path, 'mods')
-                if not os.path.exists(backup_folder):
-                    os.makedirs(backup_folder)
-                try:
-                    download_mod(data['files'][0]['url'],mods_folder)
-                    print('✅ Latest version of the mod has been downloaded!')
-                    try:
-                        shutil.move(mod_path, backup_path)
-                        print('✅ Old mod file moved to the backup folder!')
-                    except Exception as e:
-                        error = (f'Error moving file: {e}')
-                        return error
-                except Exception as e:
-                    error = (f'Error downloading file: {e}')
-                    return error
-        elif response.status_code == 404:
-            print (f'❌ There is no update for {mod_name} your loader is {loaders}-{game_versions}.')
-        else:
-            print(f'⚠️ Error: {response.status_code}')
-            print(response.text)
     except requests.exceptions.Timeout:
         print('The request timed out!')
     except requests.exceptions.RequestException as e:
         print(f'An error occurred: {e}')
+    mod_name = os.path.basename(mod_path)
+    if response.status_code == 200:
+        data = response.json()
+        latest_mod_version = fix_version_number(data['version_number'])
+        curret_mod_version = fix_version_number(get_local_mod_version(sha1_hash))
+        if latest_mod_version == curret_mod_version:
+            print (f'✅ Your mod is on the latest release: {mod_name}! Your loader is {loaders}-{loader_version}.')
+        elif latest_mod_version > curret_mod_version:
+            print('🚀 A newer version is available of this mod!')
+            print(f'Name: {mod_name}')
+            backup_folder = os.path.join(default_minecraft_path, 'mods', 'backup' )
+            backup_path = os.path.join(default_minecraft_path, 'mods', 'backup', os.path.basename(mod_path))
+            mods_folder = os.path.join(default_minecraft_path, 'mods')
+            if not os.path.exists(backup_folder):
+                os.makedirs(backup_folder)
+            try:
+                download_mod(data['files'][0]['url'],mods_folder)
+                print('✅ Latest version of the mod has been downloaded!')
+                try:
+                    shutil.move(mod_path, backup_path)
+                    print('✅ Old mod file moved to the backup folder!')
+                except Exception as e:
+                    error = (f'Error moving file: {e}')
+                    return error
+            except Exception as e:
+                error = (f'Error downloading file: {e}')
+                return error
+    elif response.status_code == 404:
+        print (f'❌ There is no update for {mod_name} your loader is {loaders}-{game_versions}.')
+    else:
+        print(f'⚠️ Error: {response.status_code}')
+        print(response.text)
 
 def update_mods():
 
@@ -438,7 +440,7 @@ def update_mods():
         None
     """
     all_mods = get_all_local_mods()
-    loader = get_current_loaders()
+    loader = get_current_loader()
     loader_version = get_current_fabric_version()
         
     update_in_progress = False

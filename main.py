@@ -20,7 +20,6 @@ env_run_resourepacks_update = os.getenv('RUN_RESOUREPACKS_UPDATER')
 env_run_shaderpacks_update = os.getenv('RUN_SHADERPACKS_UPDATER')
 
 def get_sha1_hash(file_path):
-
     """
     Calculates and returns the SHA1 hash of a local file.
 

@@ -71,7 +71,7 @@ RUN_SHADERPACKS_UPDATER=true
 Just run the script:
 
 ```bash
-python tets.py
+python main.py
 ```
 
 ---

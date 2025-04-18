@@ -1,173 +1,155 @@
-# 🧩 Modrinth Mods Updater
+# 🧩 Modrinth Auto Updater for Mods, Resource Packs & Shader Packs
 
-A Python-based tool for **automatically checking and updating Minecraft mods** using the [Modrinth API](https://docs.modrinth.com/). Keep your mods folder clean, updated, and compatible — with backup and fallback support built-in.
-
----
-
-## 📋 Features
-
-- ✅ **Auto-updates mods** based on SHA1 matching via Modrinth.
-- 🚧 **Moves unsupported or incompatible mods** to a `wait_for_update` folder.
-- 📁 **Backs up old mod versions** to a `backup` folder before replacing them.
-- 🔒 Computes and verifies **SHA1/SHA256 hashes** to identify exact files.
-- 🔄 **Re-checks mods in waitlist** for updates on future runs.
-- 🔧 Currently supports the **Fabric** mod loader (others coming soon).
-- 📂 Works with mods stored in the standard `mods` folder of Minecraft.
-- ⚡ Detects active Minecraft version and loader from `launcher_profiles.json`.
+A Python-based automation tool that checks, updates, and manages your **Minecraft mods, resourcepacks, and shaderpacks** using the [Modrinth API](https://docs.modrinth.com/). Perfect for keeping your Minecraft installation clean, compatible, and up-to-date — with automatic backups and version detection.
 
 ---
 
-## 🛠️ Prerequisites
+## 📦 Features
 
-Before using this tool, make sure you have:
-
-- 🐍 Python 3.7 or higher
-- 📡 Internet access (required for Modrinth API calls)
-- 🎮 Minecraft installed with the **Fabric** loader
-- 📁 Mods placed in your Minecraft `mods/` directory
+- ✅ **Auto-update mods, resourcepacks, and shaderpacks**
+- 💾 **Backup old versions** before replacing
+- 🔍 **Match files using SHA1 hash** with Modrinth’s version API
+- 📂 **Detect current Minecraft loader and version**
+- 🧠 **Smart snapshot filtering** — ignores snapshot/pre-release versions
+- 🕵️ **Separate folders** for incompatible mods: `wait_for_update`
+- ⚙️ Supports `Fabric`, with basic detection for `Forge`, `NeoForge`, and `Quilt` (update logic applies to Fabric)
 
 ---
 
-## 📥 Installation
+## 📋 Requirements
 
-### 1. Clone this repository
+- Python 3.7+
+- Minecraft installed (preferably with Fabric)
+- Mods/Resourcepacks/Shaderpacks placed in their respective Minecraft folders
+- Internet connection for API calls
+- Mod files must exist on [Modrinth](https://modrinth.com)
+
+---
+
+## 🔧 Setup
+
+### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/modrinth-mods-updater.git
-cd modrinth-mods-updater
+git clone https://github.com/yourusername/modrinth-multi-updater.git
+cd modrinth-multi-updater
 ```
 
-### 2. Install Python dependencies
+### 2. Install Python Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-**Contents of `requirements.txt`:**
-
+Contents of `requirements.txt`:
 ```
 requests
-python-dotenv
 packaging
+python-dotenv
 ```
 
-### 3. Configure your Minecraft path
+---
 
-By default, the script auto-detects your Minecraft folder based on your OS. To override this:
-
-#### Option A: Edit `main.py` directly
-
-```python
-default_minecraft_path = 'C:/Path/To/Your/.minecraft'
-```
-
-#### Option B: Use a `.env` file
+### 3. Configure `.env` File
 
 Create a `.env` file in the project root:
 
 ```env
-DEFAULT_MC_FOLDER=C:/Path/To/Your/.minecraft
+# Path to Minecraft folder
+DEFAULT_MC_FOLDER=C:/Users/YourName/AppData/Roaming/.minecraft
+
+# Enable or disable different updaters
+RUN_MODS_UPDATER=true
+RUN_RESOUREPACKS_UPDATER=true
+RUN_SHADERPACKS_UPDATER=true
 ```
 
 ---
 
 ## 🚀 Usage
 
-Run the script from the terminal:
+Just run the script:
 
 ```bash
-python main.py
+python tets.py
 ```
-
-### What It Does
-
-1. Scans your `mods/` folder.
-2. Identifies mods with known SHA1 hashes via the Modrinth API.
-3. Checks compatibility with your current Minecraft + loader version.
-4. Downloads newer versions, if available.
-5. Moves old versions to `mods/backup/`.
-6. Moves incompatible mods to `mods/wait_for_update/`.
-7. Attempts to re-update mods from `wait_for_update/` if now supported.
 
 ---
 
-## 🖥️ Example Output
+## 📁 Folder Structure
+
+```
+.minecraft/
+├── mods/
+│   └── *.jar                      # Installed mods
+├── resourcepacks/
+│   └── *.zip                      # Installed resource packs
+├── shaderpacks/
+│   └── *.zip                      # Installed shader packs
+├── modrinth_updater/
+│   ├── mods/
+│   │   ├── backup/                # Old mod backups
+│   │   ├── wait_for_update/       # Mods not supported by Modrinth or game version
+│   ├── resourcepacks/
+│   │   ├── backup/                # Resource pack backups
+│   │   ├── wait_for_update/       # Unsupported resource packs
+│   ├── shaderpacks/
+│   │   ├── backup/                # Shader pack backups
+│   │   ├── wait_for_update/       # Unsupported shader packs
+├── launcher_profiles.json         # Used to detect Minecraft version and loader
+```
+
+---
+
+## 🛠 How it Works
+
+1. SHA1 hash is calculated for each file.
+2. Hash is checked against Modrinth's database to identify the file.
+3. Current version is compared with the latest Modrinth version.
+4. If newer: downloads and backs up old file.
+5. If unsupported or incompatible: moves file to `wait_for_update`.
+
+---
+
+## 🧪 Sample Output
 
 ```bash
 🔍 Checking mod: Lithium-0.10.0.jar
 ✅ Lithium is up-to-date.
 
-🔍 Checking mod: SomeOldMod-1.0.0.jar
-⚠️ Found newer compatible version!
-⬇️ Downloaded: SomeOldMod-1.1.2.jar
-📦 Old version moved to: backup/
+🔍 Checking resourcepack: BetterGrass-2.4.7.zip
+🚀 A newer version is available!
+⬇️ Downloaded: BetterGrass-2.5.0.zip
+📦 Old version backed up
+
+⚠️ The shaderpack moved to wait_for_update due to incompatibility.
 ```
 
 ---
 
-## ⚙️ Folder Structure
+## 🧩 Notes
 
-```plaintext
-.minecraft/
-├── mods/
-│   ├── backup/            # Backups of updated mods
-│   ├── wait_for_update/   # Incompatible or unknown mods
-│   └── *.jar              # Actual mod files
-├── launcher_profiles.json # Used to detect loader & version
-```
+- Only mods **hosted on Modrinth** are supported.
+- Snapshot versions like `"25w14a"` are ignored automatically.
+- File operations (moving, deleting, downloading) are safe and logged.
+- The tool will **recheck waitlisted files** on every run.
 
 ---
 
-## 🧩 How It Works (Under the Hood)
+## 🧾 License
 
-- Uses SHA1 to identify mods in the Modrinth database.
-- Uses your active `launcher_profiles.json` to determine game version and loader.
-- Makes Modrinth API calls to:
-  - Match hash to a project/version
-  - Fetch the latest compatible version
-  - Download updated `.jar` files
-- Makes smart folder moves to back up or defer incompatible mods.
-
----
-
-## 📌 Notes
-
-- 🧪 This tool works only with mods hosted on **Modrinth**.
-- 💾 Always **back up** your `.minecraft` folder before running if you're unsure.
-- 🖇 You can place "pending" mods in `wait_for_update/` — the script will retry them later.
-- ⛔ Snapshot Minecraft versions (like `1.20w`) are excluded by default.
-
----
-
-## 🔒 License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for full details.
+This project is licensed under the MIT License. See `LICENSE`.
 
 ---
 
 ## 🤝 Contributing
 
-Found a bug? Want to add support for Forge, Quilt, or NeoForge? Feel free to:
+Pull requests, improvements, or new loader support (Forge, NeoForge, Quilt) are welcome!
 
-1. Fork the repo
-2. Make changes
-3. Submit a pull request
-
-Help is always welcome!
+1. Fork it
+2. Make your changes
+3. Submit a PR 🚀
 
 ---
 
-## 🙋 FAQ
-
-**Q: Will this work with Forge or Quilt?**  
-🧪 Not yet. Right now only Fabric is supported, but multi-loader support is planned.
-
-**Q: Will it delete my mods?**  
-❌ No. It only backs up and moves files — nothing is permanently deleted.
-
-**Q: Can I use this on a modpack?**  
-✅ Yes, as long as it's using Fabric and Modrinth-hosted mods.
-
----
-
-🎉 Happy modding!
+🎉 Enjoy your fully automated Minecraft mod and pack management!

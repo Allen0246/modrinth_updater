@@ -1,3 +1,4 @@
+import os
 import requests
 from modrinth_updater.hash_utils import get_sha1_hash
 from modrinth_updater.file_utils import get_current_fabric_version, get_current_loader
@@ -94,7 +95,7 @@ def check_update(path, game_versions=None, loaders=None):
         return response, loader_version, loaders, sha1_hash
     except requests.exceptions.Timeout:
         print('The request timed out!')
-        return None
-    except requests.exceptions.RequestException as e:
-        print(f'An error occurred: {e}')
-        return None
+        return response, loader_version, loaders, sha1_hash
+    except requests.exceptions.RequestException:
+        print (f'❌ There is no update for {os.path.basename(path)} your loader is {loaders}-{game_versions}.')
+        return response, loader_version, loaders, sha1_hash

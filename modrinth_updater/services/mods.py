@@ -65,7 +65,6 @@ def check_updateable_mods(mod_path, game_versions=None, loaders=None):
         except Exception as e:
             error = (f'Error moving file: {e}')
             return error
-        print (f'❌ There is no update for {mod_path} your loader is {loaders}-{game_versions}.')
     else:
         print(f'⚠️  Error: {response.status_code}')
         print(response.text)
@@ -114,7 +113,7 @@ def check_wait_for_update_mods(mod_path, game_versions=None, loaders=None):
                 error = (f'Error downloading file: {e}')
                 return error
     elif response.status_code == 404:
-        print (f'❌ There is no update for {mod_name} your loader is {loaders}-{game_versions}.')
+        return
     else:
         print(f'⚠️  Error: {response.status_code}')
         print(response.text)

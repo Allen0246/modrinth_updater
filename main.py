@@ -31,6 +31,7 @@ def update():
 
     if env_run_mods_update == "true":
         # get wait for update mods
+        print('❗️ Checking updateable mods in the mods folder...')
         wait_for_update_mods = get_wait_for_update_mods()
         wait_for_update_mods_folder = os.path.join(default_minecraft_path, 'modrinth_updater', 'mods', 'wait_for_update' )
         #updating mods
@@ -50,6 +51,7 @@ def update():
 
     if env_run_resourepacks_update == "true":
         #get wait for update resource packs
+        print('❗️ Checking updateable resource packs in the resourcepacks folder...')
         wait_for_update_resource_packs = get_wait_for_update_resource_packs()
         wait_for_update_resourcepacks_folder = os.path.join(default_minecraft_path, 'modrinth_updater', 'resourcepacks', 'wait_for_update' )
         #updating resource packs
@@ -69,6 +71,7 @@ def update():
 
     if env_run_shaderpacks_update == "true":
         #get wait for update shader packs
+        print('❗️ Checking updateable shaderpacks in the shaderpacks folder...')
         wait_for_update_shaderpacks = get_wait_for_update_shaderpacks()
         wait_for_update_shaderpacks_folder = os.path.join(default_minecraft_path, 'modrinth_updater', 'shaderpacks', 'wait_for_update' )
         #updating shader packs
@@ -77,7 +80,7 @@ def update():
             if updatable_shaderpacks:
                 update_in_progres = True
         if os.path.exists(wait_for_update_shaderpacks_folder) and os.listdir(wait_for_update_shaderpacks_folder):
-            print('❗️ Checking updateable resource packs in the wait_for_update folder...')
+            print('❗️ Checking updateable shaderpacks in the wait_for_update folder...')
             for shaderpack_file in wait_for_update_shaderpacks:
                 wait_for_update_shaderpacks = check_wait_for_update_shaderpacks(shaderpack_file, loader_version, None)
                 if wait_for_update_shaderpacks:
@@ -90,4 +93,5 @@ def update():
         print('✅ Everything is up to date!')
 
 if __name__ == "__main__":
+    print(env_run_shaderpacks_update)
     update()

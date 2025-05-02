@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 import os
 
-load_dotenv()
+load_dotenv(override=True)
 env_mc_path = os.getenv('DEFAULT_MC_FOLDER')
 if not env_mc_path:
     default_minecraft_path = env_mc_path

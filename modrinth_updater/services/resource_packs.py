@@ -20,6 +20,11 @@ def check_updateable_resourcepacks(resourcepacks_path, game_versions=None, loade
     backup_folder = os.path.join(default_minecraft_path, 'modrinth_updater', 'resourcepacks', 'backup' )
     backup_path = os.path.join(default_minecraft_path, 'modrinth_updater', 'resourcepacks', 'backup', os.path.basename(resourcepacks_path))
     resourcepacks_folder = os.path.join(default_minecraft_path, 'resourcepacks')
+    wait_for_update_folder = os.path.join(default_minecraft_path, 'modrinth_updater', 'resourcepacks', 'wait_for_update' )
+    wait_for_update_path = os.path.join(default_minecraft_path, 'modrinth_updater', 'resourcepacks', 'wait_for_update', os.path.basename(resourcepacks_path) )
+    if not os.path.exists(wait_for_update_folder):
+        os.makedirs(wait_for_update_folder)
+
     response, loader_version, loaders, sha1_hash = check_update(resourcepacks_path, game_versions, loaders)
     resourcepack_name = os.path.basename(resourcepacks_path)
     if response is None:
@@ -48,10 +53,6 @@ def check_updateable_resourcepacks(resourcepacks_path, game_versions=None, loade
                 error = (f'Error downloading file: {e}')
                 return error
     elif response.status_code == 404:
-        wait_for_update_folder = os.path.join(default_minecraft_path, 'modrinth_updater', 'resourcepacks', 'wait_for_update' )
-        wait_for_update_path = os.path.join(default_minecraft_path, 'modrinth_updater', 'resourcepacks', 'wait_for_update', os.path.basename(resourcepacks_path) )
-        if not os.path.exists(wait_for_update_folder):
-                os.makedirs(wait_for_update_folder)
         try:
             shutil.move(resourcepacks_path, wait_for_update_path)
             print ("⚠️  The resource pack moved to the 'modrinth_updater/resourcepacks/wait_for_update' folder because of incompatibility!")

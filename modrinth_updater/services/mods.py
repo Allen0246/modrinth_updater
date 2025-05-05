@@ -26,6 +26,11 @@ def check_updateable_mods(mod_path, game_versions=None, loaders=None):
     backup_folder = os.path.join(default_minecraft_path, 'modrinth_updater', 'mods', 'backup' )
     backup_path = os.path.join(default_minecraft_path, 'modrinth_updater', 'mods' ,'backup', os.path.basename(mod_path))
     mods_folder = os.path.join(default_minecraft_path, 'mods')
+    wait_for_update_folder = os.path.join(default_minecraft_path, 'modrinth_updater', 'mods', 'wait_for_update' )
+    wait_for_update_path = os.path.join(default_minecraft_path, 'modrinth_updater', 'mods', 'wait_for_update', os.path.basename(mod_path) )
+    if not os.path.exists(wait_for_update_folder):
+        os.makedirs(wait_for_update_folder)
+
     response, loader_version, loaders, sha1_hash = check_update(mod_path, game_versions, loaders)
     mod_name = os.path.basename(mod_path)
     if response is None:
@@ -55,10 +60,6 @@ def check_updateable_mods(mod_path, game_versions=None, loaders=None):
                 return error
 
     elif response.status_code == 404:
-        wait_for_update_folder = os.path.join(default_minecraft_path, 'modrinth_updater', 'mods', 'wait_for_update' )
-        wait_for_update_path = os.path.join(default_minecraft_path, 'modrinth_updater', 'mods', 'wait_for_update', os.path.basename(mod_path) )
-        if not os.path.exists(wait_for_update_folder):
-                os.makedirs(wait_for_update_folder)
         try:
             shutil.move(mod_path, wait_for_update_path)
             print ("⚠️  The mod moved to the 'modrinth_updater/mods/wait_for_update' folder because of incompatibility!")

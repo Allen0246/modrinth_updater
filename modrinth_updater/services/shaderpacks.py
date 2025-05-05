@@ -20,6 +20,11 @@ def check_updateable_shaderpacks(shaderpacks_path, game_versions=None, loaders=N
     backup_folder = os.path.join(default_minecraft_path, 'modrinth_updater', 'shaderpacks', 'backup' )
     backup_path = os.path.join(default_minecraft_path, 'modrinth_updater', 'shaderpacks', 'backup', os.path.basename(shaderpacks_path))
     shaderpacks_folder = os.path.join(default_minecraft_path, 'shaderpacks')
+    wait_for_update_folder = os.path.join(default_minecraft_path, 'modrinth_updater', 'shaderpacks', 'wait_for_update' )
+    wait_for_update_path = os.path.join(default_minecraft_path, 'modrinth_updater', 'shaderpacks', 'wait_for_update', os.path.basename(shaderpacks_path) )
+    if not os.path.exists(wait_for_update_folder):
+        os.makedirs(wait_for_update_folder)
+
     response, loader_version, loaders, sha1_hash = check_update(shaderpacks_path, game_versions, loaders)
     shaderpacks_name = os.path.basename(shaderpacks_path)
     if response is None:
@@ -48,10 +53,6 @@ def check_updateable_shaderpacks(shaderpacks_path, game_versions=None, loaders=N
                 error = (f'Error downloading file: {e}')
                 return error
     elif response.status_code == 404:
-        wait_for_update_folder = os.path.join(default_minecraft_path, 'modrinth_updater', 'shaderpacks', 'wait_for_update' )
-        wait_for_update_path = os.path.join(default_minecraft_path, 'modrinth_updater', 'shaderpacks', 'wait_for_update', os.path.basename(shaderpacks_path) )
-        if not os.path.exists(wait_for_update_folder):
-                os.makedirs(wait_for_update_folder)
         try:
             shutil.move(shaderpacks_path, wait_for_update_path)
             print ("⚠️  The shaderpack moved to the 'modrinth_updater/shaderpacks/wait_for_update' folder because of incompatibility!")

@@ -1,5 +1,6 @@
 import os
 import requests
+from http import HTTPStatus
 from modrinth_updater.hash_utils import get_sha1_hash
 from modrinth_updater.file_utils import get_current_fabric_version, get_current_loader
 
@@ -19,11 +20,11 @@ def get_latest_mod_versions(mod_project_id):
     url = f'{MODRINTH_API_BASE}/project/{mod_project_id}'
     try:
         response = requests.get(url, timeout=5)
-        if response.status_code == 200:
+        if response.status_code == HTTPStatus.OK:
             data = response.json()
             filtered_latest_mod_versions = [v for v in data['game_versions'] if 'w' not in v]
             return filtered_latest_mod_versions[-1]
-        elif response.status_code == 404:
+        elif response.status_code == HTTPStatus.NOT_FOUND:
             print (f'❌ Cannot find the mod witht the project id: {mod_project_id}')
         else:
             print(f'⚠️  Error: {response.status_code}')
@@ -46,10 +47,10 @@ def get_local_version(hashed_file):
     url = f'{MODRINTH_API_BASE}/version_file/{hashed_file}'
     try:
         response = requests.get(url, timeout=5)
-        if response.status_code == 200:
+        if response.status_code == HTTPStatus.OK:
             data = response.json()
             return data['game_versions']
-        elif response.status_code == 404:
+        elif response.status_code == HTTPStatus.NOT_FOUND:
             print (f'❌ Cannot find the mod with the hash: {hashed_file}')
         else:
             print(f'  Error: {response.status_code}')

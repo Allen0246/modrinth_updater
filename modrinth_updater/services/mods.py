@@ -1,28 +1,23 @@
 import os
 import shutil
+from http import HTTPStatus
 from modrinth_updater.config import default_minecraft_path
 from modrinth_updater.modrinth_api import check_update, get_local_version
 from modrinth_updater.file_utils import fix_version_number, download_mod
 
 def check_updateable_mods(mod_path, game_versions=None, loaders=None):
     """
-    Checks if a mod is updateable and updates it if there is a newer version.
+    Checks if a given mod is updatable, and if so, downloads the latest version and backs up the old file.
+    If the mod is not supported or incompatible, it is moved to the 'wait_for_update' folder.
 
-    Parameters
-    ----------
-    mod_path : str
-        The path to the mod file.
-    game_versions : list, optional
-        A list of game versions to support, by default None.
-    loaders : list, optional
-        A list of loaders to support, by default None.
+    Args:
+        mod_path (str): The path to the mod file to check for updates.
+        game_versions (list, optional): A list of game versions to check compatibility against. Defaults to None.
+        loaders (list, optional): A list of loaders to check compatibility against. Defaults to None.
 
-    Returns
-    -------
-    str
-        An error message if there was an error.
+    Returns:
+        str: An error message if something went wrong during the download or file move operations, otherwise None.
     """
-    
     backup_folder = os.path.join(default_minecraft_path, 'modrinth_updater', 'mods', 'backup' )
     backup_path = os.path.join(default_minecraft_path, 'modrinth_updater', 'mods' ,'backup', os.path.basename(mod_path))
     mods_folder = os.path.join(default_minecraft_path, 'mods')
@@ -31,7 +26,7 @@ def check_updateable_mods(mod_path, game_versions=None, loaders=None):
     mod_name = os.path.basename(mod_path)
     if response is None:
         print(f'⚠️ Cannot update this mod: {mod_name} because the update check failed.')
-    if response.status_code == 200:
+    if response.status_code == HTTPStatus.OK:
         data = response.json()
         latest_mod_version = fix_version_number(data['game_versions'])
         curret_mod_version = fix_version_number(get_local_version(sha1_hash))
@@ -55,7 +50,7 @@ def check_updateable_mods(mod_path, game_versions=None, loaders=None):
                 error = (f'Error downloading file: {e}')
                 return error
 
-    elif response.status_code == 404:
+    elif response.status_code == HTTPStatus.NOT_FOUND:
         wait_for_update_folder = os.path.join(default_minecraft_path, 'modrinth_updater', 'mods', 'wait_for_update' )
         wait_for_update_path = os.path.join(default_minecraft_path, 'modrinth_updater', 'mods', 'wait_for_update', os.path.basename(mod_path) )
         if not os.path.exists(wait_for_update_folder):
@@ -72,16 +67,17 @@ def check_updateable_mods(mod_path, game_versions=None, loaders=None):
 
 def check_wait_for_update_mods(mod_path, game_versions=None, loaders=None):
     """
-    This function will check if the mods in the 'modrinth_updater/mods/wait_for_update' folder are now compatible with the current Minecraft version and loader.
-
+    Checks if a given mod in the 'modrinth_updater/mods/wait_for_update' folder is now compatible with the current Minecraft version and loader.
     If the mod is compatible, it will download the latest version, move the old file to the 'modrinth_updater/mods/backup' folder and the new file to the mods folder.
-
     If the mod is not compatible, it will print a message with the loader and Minecraft version that is incompatible.
 
-    :param mod_path: The path to the mod file
-    :param game_versions: A list of Minecraft versions to check for compatibility
-    :param loaders: A list of loaders to check for compatibility
-    :return: An error message if there is an issue downloading or moving the file
+    Args:
+        mod_path (str): The path to the mod file to check for updates.
+        game_versions (list, optional): A list of Minecraft versions to check compatibility against. Defaults to None.
+        loaders (list, optional): A list of loaders to check compatibility against. Defaults to None.
+
+    Returns:
+        str: An error message if there is an issue downloading or moving the file
     """
     backup_folder = os.path.join(default_minecraft_path, 'modrinth_updater', 'mods', 'backup' )
     backup_path = os.path.join(default_minecraft_path, 'modrinth_updater', 'mods', 'backup', os.path.basename(mod_path))
@@ -90,7 +86,7 @@ def check_wait_for_update_mods(mod_path, game_versions=None, loaders=None):
     mod_name = os.path.basename(mod_path)
     if response is None:
         print("⚠️ Cannot update this mod because the update check failed.")
-    if response.status_code == 200:
+    if response.status_code == HTTPStatus.OK:
         data = response.json()
         latest_mod_version = fix_version_number(data['game_versions'])
         curret_mod_version = fix_version_number(get_local_version(sha1_hash))
@@ -113,7 +109,7 @@ def check_wait_for_update_mods(mod_path, game_versions=None, loaders=None):
             except Exception as e:
                 error = (f'Error downloading file: {e}')
                 return error
-    elif response.status_code == 404:
+    elif response.status_code == HTTPStatus.NOT_FOUND:
         return
     else:
         print(f'⚠️  Error: {response.status_code}')

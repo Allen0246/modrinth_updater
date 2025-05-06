@@ -2,7 +2,7 @@ import os
 from modrinth_updater.config import default_minecraft_path, env_run_mods_update, env_run_resourepacks_update, env_run_shaderpacks_update
 from modrinth_updater.file_utils import get_all_local_mods, get_all_resource_packs, get_all_shaderpacks, get_wait_for_update_mods, get_wait_for_update_resource_packs, get_wait_for_update_shaderpacks, get_current_fabric_version, get_current_loader
 from modrinth_updater.services.mods import check_updateable_mods, check_wait_for_update_mods
-from modrinth_updater.services.resource_packs import check_updateable_resourcepacks,check_wait_for_update_resourcepacks
+from modrinth_updater.services.resourcepacks import check_updateable_resourcepacks,check_wait_for_update_resourcepacks
 from modrinth_updater.services.shaderpacks import check_updateable_shaderpacks, check_wait_for_update_shaderpacks
 def update():
     """

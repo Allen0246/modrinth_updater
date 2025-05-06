@@ -3,7 +3,6 @@ import urllib.parse
 import json
 from packaging.version import Version
 import requests
-
 from modrinth_updater.config import default_minecraft_path
 
 def download_mod(url, save_folder, mod_name=None):

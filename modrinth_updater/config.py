@@ -31,5 +31,3 @@ elif system == 'Linux':
 env_run_mods_update = os.getenv('RUN_MODS_UPDATER')
 env_run_resourepacks_update = os.getenv('RUN_RESOUREPACKS_UPDATER')
 env_run_shaderpacks_update = os.getenv('RUN_SHADERPACKS_UPDATER')
-
-# End-of-file

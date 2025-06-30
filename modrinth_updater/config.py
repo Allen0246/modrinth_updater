@@ -3,7 +3,7 @@ import os
 
 load_dotenv(override=True)
 env_mc_path = os.getenv('DEFAULT_MC_FOLDER')
-if not env_mc_path:
+if env_mc_path is not None:
     default_minecraft_path = env_mc_path
 else:
     appdata_path = os.getenv('APPDATA')

@@ -65,10 +65,17 @@ def get_current_fabric_version(path = default_minecraft_path):
         with open(json_path, 'r') as file:
             data = json.load(file)
             loader_name=[]
+            versions =[]
             for loaders in data['profiles']:
                 if 'fabric' in loaders:
                     loader_name.append(loaders)
-                    fabric_version = loader_name[0].split('-')[-1]
+                    if len(loader_name) < 2:
+                        fabric_version = loader_name[0].split('-')[-1]
+                    else:
+                        for vers in loader_name:
+                            versions.append(vers.split('-')[-1])
+                        fabric_version = [v for v in versions if 'w' not in v.lower()]
+                        print(max(fabric_version, key=Version))
                     return fabric_version
             if not loader_name:
                 print('No fabric version found.')
@@ -274,3 +281,33 @@ def get_wait_for_update_shaderpacks(only_name = False, path = default_minecraft_
             else:
                 list_shaderpacks.append(shaderpacks_with_path)
     return list_shaderpacks
+
+def get_all_saves(only_name = False, path = default_minecraft_path):
+    """
+    Retrieves a list of all local saves in the specified directory.
+
+    This function scans the 'saves' folder within the specified directory path 
+    and returns a list of either the full paths or just the file names of the saves found.
+
+    Args:
+        only_name (bool, optional): If True, returns only the save file names. 
+                                    If False, returns the full paths. Defaults to False.
+        path (str, optional): The path to the directory containing the 'saves' folder. 
+                              Defaults to the global variable `default_minecraft_path`.
+
+    Returns:
+        list: A list of save file names or full paths depending on the `only_name` parameter.
+    """
+    saves_folder = os.path.join(path, 'saves')
+    list_saves = []
+    for save in os.listdir(saves_folder):
+        save_with_path = os.path.join(saves_folder, save)
+    if os.path.isfile(save_with_path):
+        if only_name:
+            list_saves.append(os.path.basename(save_with_path))
+        else:
+            list_saves.append(save_with_path)
+    return list_saves
+
+def get_all_datapacks(path):
+    datapacks_folder = os.path.join(path, 'datapacks')

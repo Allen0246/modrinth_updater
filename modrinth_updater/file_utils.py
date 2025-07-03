@@ -69,17 +69,18 @@ def get_current_fabric_version(path = default_minecraft_path):
             for loaders in data['profiles']:
                 if 'fabric' in loaders:
                     loader_name.append(loaders)
-                    if len(loader_name) < 2:
-                        fabric_version = loader_name[0].split('-')[-1]
-                    else:
-                        for vers in loader_name:
-                            versions.append(vers.split('-')[-1])
-                        fabric_version = [v for v in versions if 'w' not in v.lower()]
-                        print(max(fabric_version, key=Version))
-                    return fabric_version
-            if not loader_name:
-                print('No fabric version found.')
-            return loader_name
+            if len(loader_name) < 2:
+                fabric_version = loader_name[0].split('-')[-1]
+            elif len(loader_name) >= 2:
+                for vers in loader_name:
+                    versions.append(vers.split('-')[-1])
+                fabric_version = [v for v in versions if 'w' not in v.lower()]
+                fabric_version = (max(fabric_version, key=Version))
+                return fabric_version
+            else:
+                if not loader_name:
+                    print('No fabric version found.')
+                    return loader_name
     except Exception as e:
         error = (f'Error reading launcher_profiles.json: {e}')
         return error

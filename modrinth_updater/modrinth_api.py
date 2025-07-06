@@ -19,7 +19,7 @@ def get_latest_mod_versions(mod_project_id):
     """
     url = f'{MODRINTH_API_BASE}/project/{mod_project_id}'
     try:
-        response = requests.get(url, timeout=5)
+        response = requests.get(url, timeout=15)
         if response.status_code == HTTPStatus.OK:
             data = response.json()
             filtered_latest_mod_versions = [v for v in data['game_versions'] if 'w' not in v]
@@ -46,7 +46,7 @@ def get_local_version(hashed_file):
     """
     url = f'{MODRINTH_API_BASE}/version_file/{hashed_file}'
     try:
-        response = requests.get(url, timeout=5)
+        response = requests.get(url, timeout=15)
         if response.status_code == HTTPStatus.OK:
             data = response.json()
             return data['game_versions']
@@ -91,7 +91,7 @@ def check_update(path, game_versions=None, loaders=None):
     else:
         loaders = get_current_loader()
     try:
-        response = requests.post(url, json=body, headers=headers, timeout=5)
+        response = requests.post(url, json=body, headers=headers, timeout=15)
         response.raise_for_status()
         return response, loader_version, loaders, sha1_hash
     except requests.exceptions.Timeout:

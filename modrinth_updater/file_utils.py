@@ -23,7 +23,7 @@ def download_mod(url, save_folder, mod_name=None):
         mod_name = urllib.parse.unquote(mod_name)
     save_path = os.path.join(save_folder, mod_name)
     try:
-        response = requests.get(url, stream=True, timeout=5)
+        response = requests.get(url, stream=True, timeout=15)
         with open(save_path, 'wb') as file:
             for chunk in response.iter_content(chunk_size=8192):
                 file.write(chunk)
@@ -71,6 +71,7 @@ def get_current_fabric_version(path = default_minecraft_path):
                     loader_name.append(loaders)
             if len(loader_name) < 2:
                 fabric_version = loader_name[0].split('-')[-1]
+                return fabric_version
             elif len(loader_name) >= 2:
                 for vers in loader_name:
                     versions.append(vers.split('-')[-1])

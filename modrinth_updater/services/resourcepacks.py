@@ -3,7 +3,7 @@ import shutil
 from http import HTTPStatus
 from modrinth_updater.config import default_minecraft_path
 from modrinth_updater.modrinth_api import check_update, get_local_version
-from modrinth_updater.file_utils import fix_version_number, download_mod
+from modrinth_updater.file_utils import fix_version_number, download_mod, get_current_fabric_version
 
 def check_updateable_resourcepacks(resourcepacks_path, game_versions=None, loaders=None):
     """
@@ -27,6 +27,7 @@ def check_updateable_resourcepacks(resourcepacks_path, game_versions=None, loade
         print(f'⚠️ Cannot update this resource pack: {resourcepack_name} because the update check failed.')
     if response.status_code == HTTPStatus.OK:
         data = response.json()
+        loader_version = get_current_fabric_version()
         latest_mod_version = fix_version_number(data['game_versions'])
         curret_mod_version = fix_version_number(get_local_version(sha1_hash))
         if latest_mod_version == curret_mod_version:
@@ -85,6 +86,7 @@ def check_wait_for_update_resourcepacks(resourcepacks_path, game_versions=None, 
         print("⚠️ Cannot update this resurce pack because the update check failed.")
     if response.status_code == HTTPStatus.OK:
         data = response.json()
+        loader_version = get_current_fabric_version()
         latest_mod_version = fix_version_number(data['game_versions'])
         curret_mod_version = fix_version_number(get_local_version(sha1_hash))
         if latest_mod_version == curret_mod_version:

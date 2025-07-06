@@ -3,7 +3,7 @@ import shutil
 from http import HTTPStatus
 from modrinth_updater.config import default_minecraft_path
 from modrinth_updater.modrinth_api import check_update, get_local_version
-from modrinth_updater.file_utils import fix_version_number, download_mod
+from modrinth_updater.file_utils import fix_version_number, download_mod, get_current_fabric_version
 
 def check_updateable_mods(mod_path, game_versions=None, loaders=None):
     """
@@ -28,11 +28,12 @@ def check_updateable_mods(mod_path, game_versions=None, loaders=None):
         print(f'⚠️ Cannot update this mod: {mod_name} because the update check failed.')
     if response.status_code == HTTPStatus.OK:
         data = response.json()
+        loader_version = get_current_fabric_version()
         latest_mod_version = fix_version_number(data['game_versions'])
         curret_mod_version = fix_version_number(get_local_version(sha1_hash))
         if latest_mod_version == curret_mod_version:
             print (f'✅ Your mod is on the latest release: {mod_name}! Your loader is {loaders}-{loader_version}.')
-        elif latest_mod_version > curret_mod_version:
+        elif latest_mod_version > curret_mod_version or loader_version < curret_mod_version:
             print('🚀 A newer version is available of this mod!')
             print(f"Name: {data['name']}")
             if not os.path.exists(backup_folder):
@@ -88,11 +89,12 @@ def check_wait_for_update_mods(mod_path, game_versions=None, loaders=None):
         print("⚠️ Cannot update this mod because the update check failed.")
     if response.status_code == HTTPStatus.OK:
         data = response.json()
+        loader_version = get_current_fabric_version()
         latest_mod_version = fix_version_number(data['game_versions'])
         curret_mod_version = fix_version_number(get_local_version(sha1_hash))
         if latest_mod_version == curret_mod_version:
             print (f'✅ Your mod is on the latest release: {mod_name}! Your loader is {loaders}-{loader_version}.')
-        elif latest_mod_version > curret_mod_version:
+        elif latest_mod_version > curret_mod_version or loader_version < curret_mod_version:
             print('🚀 A newer version is available of this mod!')
             print(f"Name: {data['name']}")
             if not os.path.exists(backup_folder):

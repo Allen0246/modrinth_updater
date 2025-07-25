@@ -304,12 +304,21 @@ def get_all_saves(only_name = False, path = default_minecraft_path):
     list_saves = []
     for save in os.listdir(saves_folder):
         save_with_path = os.path.join(saves_folder, save)
-    if os.path.isfile(save_with_path):
-        if only_name:
-            list_saves.append(os.path.basename(save_with_path))
-        else:
-            list_saves.append(save_with_path)
+        if os.path.isfile(save_with_path):
+            if only_name:
+                list_saves.append(os.path.basename(save_with_path))
+            else:
+                list_saves.append(save_with_path)
     return list_saves
 
-def get_all_datapacks(path):
-    datapacks_folder = os.path.join(path, 'datapacks')
+def get_all_datapacks(save_folder , only_name = False):
+    datapacks_folder = os.path.join(save_folder, 'datapacks')
+    datapacks = []
+    for datapack in os.listdir(datapacks_folder):
+        datapacks_with_path = os.path.join(save_folder, datapack)
+        if os.path.isfile(datapacks_with_path):
+            if only_name:
+                datapacks.append(os.path.basename(datapacks_with_path))
+            else:
+                datapacks.append(datapacks_with_path)
+    return datapacks

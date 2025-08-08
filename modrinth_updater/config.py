@@ -32,6 +32,7 @@ elif system == 'Linux':
 env_run_mods_update = os.getenv('RUN_MODS_UPDATER')
 env_run_resourepacks_update = os.getenv('RUN_RESOUREPACKS_UPDATER')
 env_run_shaderpacks_update = os.getenv('RUN_SHADERPACKS_UPDATER')
+env_run_datapacks_update = os.getenv('RUN_DATAPACKS_UPDATER')
 
 # moving to wait for update folder configuration
 env_move_mods_to_wait_for_update_folder = os.getenv('WAIT_FOR_UPDATE_MODS')

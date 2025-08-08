@@ -53,62 +53,65 @@ def update():
         
     update_in_progres = False
 
+    # mods update
     if env_run_mods_update == "true":
-        # get wait for update mods
-        print('❗️ Checking updateable mods in the mods folder...')
-        #updating mods
-        for mod_file in all_mods:
-            updatable_mod = check_updateable_mods(mod_file, loader_version, loader)
-            if updatable_mod:
-                update_in_progres = True
         wait_for_update_mods = get_wait_for_update_mods()
         wait_for_update_mods_folder = os.path.join(default_minecraft_path, 'modrinth_updater', 'mods', 'wait_for_update' )
+        # if exist the wait_for_update mods folder and it has files
         if os.path.exists(wait_for_update_mods_folder) and os.listdir(wait_for_update_mods_folder):
             print('❗️ Checking updateable mods in the wait_for_update folder...')
             for mod_file in wait_for_update_mods:
                 wait_for_update_mod = check_wait_for_update_mods(mod_file, loader_version, loader)
                 if wait_for_update_mod:
                     update_in_progres = True
-            print('✅ Every mods are up to date')
+        print('❗️ Checking updateable mods in the mods folder...')
+        # updating mods at the original mods folder
+        for mod_file in all_mods:
+            updatable_mod = check_updateable_mods(mod_file, loader_version, loader)
+            if updatable_mod:
+                update_in_progres = True
+        print('✅ Every mods are up to date')
     elif env_run_mods_update == "false":
         print('⚠️  Mods updater is disabled in the .env file!')
 
+    # resourcepacks update
     if env_run_resourepacks_update == "true":
-        #get wait for update resource packs
-        print('❗️ Checking updateable resource packs in the resourcepacks folder...')
-        #updating resource packs
-        for resource_pack_file in all_resource_packs:
-            updatable_resource_packs = check_updateable_resourcepacks(resource_pack_file, loader_version, None)
-            if updatable_resource_packs:
-                update_in_progres = True
         wait_for_update_resource_packs = get_wait_for_update_resource_packs()
         wait_for_update_resourcepacks_folder = os.path.join(default_minecraft_path, 'modrinth_updater', 'resourcepacks', 'wait_for_update' )
+        # if exist the wait_for_update resourcepacks folder and it has files
         if os.path.exists(wait_for_update_resourcepacks_folder) and os.listdir(wait_for_update_resourcepacks_folder):
             print('❗️ Checking updateable resource packs in the wait_for_update folder...')
             for resource_pack_file in wait_for_update_resource_packs:
                 wait_for_update_resource_pack = check_wait_for_update_resourcepacks(resource_pack_file, loader_version, None)
                 if wait_for_update_resource_pack:
                     update_in_progres = True
-            print('✅ Every resoucepacks are up to date')
+        print('❗️ Checking updateable resource packs in the resourcepacks folder...')
+        # updating resourcepacks at the original resource_pack folder
+        for resource_pack_file in all_resource_packs:
+            updatable_resource_packs = check_updateable_resourcepacks(resource_pack_file, loader_version, None)
+            if updatable_resource_packs:
+                update_in_progres = True
+        print('✅ Every resoucepacks are up to date')
     elif env_run_resourepacks_update == "false":
         print('⚠️  Resourcepacks updater is disabled in the .env file!')
 
+    # shaderpacks update
     if env_run_shaderpacks_update == "true":
-        #get wait for update shader packs
-        print('❗️ Checking updateable shaderpacks in the shaderpacks folder...')
-        #updating shader packs
-        for shaderpack_file in all_shaderpacks:
-            updatable_shaderpacks = check_updateable_shaderpacks(shaderpack_file, loader_version, None)
-            if updatable_shaderpacks:
-                update_in_progres = True
         wait_for_update_shaderpacks = get_wait_for_update_shaderpacks()
         wait_for_update_shaderpacks_folder = os.path.join(default_minecraft_path, 'modrinth_updater', 'shaderpacks', 'wait_for_update' )
+        # if exist the wait_for_update shaderpacks folder and it has files
         if os.path.exists(wait_for_update_shaderpacks_folder) and os.listdir(wait_for_update_shaderpacks_folder):
             print('❗️ Checking updateable shaderpacks in the wait_for_update folder...')
             for shaderpack_file in wait_for_update_shaderpacks:
                 wait_for_update_shaderpacks = check_wait_for_update_shaderpacks(shaderpack_file, loader_version, None)
                 if wait_for_update_shaderpacks:
                     update_in_progres = True
+        print('❗️ Checking updateable shaderpacks in the shaderpacks folder...')
+        # updating shaderpacks at the original shaderpacks folder
+        for shaderpack_file in all_shaderpacks:
+            updatable_shaderpacks = check_updateable_shaderpacks(shaderpack_file, loader_version, None)
+            if updatable_shaderpacks:
+                update_in_progres = True
         print('✅ Every shaderpacks are up to date')
     elif env_run_shaderpacks_update == "false":
         print('⚠️  Shaderpacks updater is disabled in the .env file!')

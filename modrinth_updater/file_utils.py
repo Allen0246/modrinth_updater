@@ -284,7 +284,7 @@ def get_wait_for_update_shaderpacks(only_name = False, path = default_minecraft_
                 list_shaderpacks.append(shaderpacks_with_path)
     return list_shaderpacks
 
-def get_all_saves(only_name = False, path = default_minecraft_path):
+def get_all_save_folder(only_name = False, path = default_minecraft_path):
     """
     Retrieves a list of all local saves in the specified directory.
 
@@ -301,20 +301,89 @@ def get_all_saves(only_name = False, path = default_minecraft_path):
         list: A list of save file names or full paths depending on the `only_name` parameter.
     """
     saves_folder = os.path.join(path, 'saves')
-    list_saves = []
+    list_save_folders = []
     for save in os.listdir(saves_folder):
         save_with_path = os.path.join(saves_folder, save)
         if os.path.isfile(save_with_path):
             if only_name:
-                list_saves.append(os.path.basename(save_with_path))
+                list_save_folders.append(os.path.basename(save_with_path))
             else:
-                list_saves.append(save_with_path)
-    return list_saves
+                list_save_folders.append(save_with_path)
+    return list_save_folders
 
 def get_all_datapacks(save_folder , only_name = False):
-    datapacks_folder = os.path.join(save_folder, 'datapacks')
+    """
+    Retrieves a list of all datapacks in the specified save folder.
+
+    This function scans the 'datapacks' folder within the specified save folder path 
+    and returns a list of either the full paths or just the file names of the datapacks found.
+
+    Args:
+        save_folder (str): The path to the save folder.
+        only_name (bool, optional): If True, returns only the datapack file names. 
+                                    If False, returns the full paths. Defaults to False.
+
+    Returns:
+        list: A list of datapack file names or full paths depending on the `only_name` parameter.
+    """
+    datapacks_folder_path = os.path.join(save_folder, 'datapacks')
     datapacks = []
-    for datapack in os.listdir(datapacks_folder):
+    for datapack in os.listdir(datapacks_folder_path):
+        datapacks_with_path = os.path.join(save_folder, datapack)
+        if os.path.isfile(datapacks_with_path):
+            if only_name:
+                datapacks.append(os.path.basename(datapacks_with_path))
+            else:
+                datapacks.append(datapacks_with_path)
+    return datapacks
+
+def get_wait_for_update_save_folder(only_name = False, path = default_minecraft_path):
+    """
+    Retrieves a list of all saves in the 'wait_for_update' folder of the specified directory.
+
+    This function scans the 'wait_for_update' folder within the specified directory path 
+    and returns a list of either the full paths or just the file names of the saves found.
+
+    Args:
+        only_name (bool, optional): If True, returns only the save file names. 
+                                    If False, returns the full paths. Defaults to False.
+        path (str, optional): The path to the directory containing the 'wait_for_update' folder. 
+                              Defaults to the global variable `default_minecraft_path`.
+
+    Returns:
+        list: A list of save file names or full paths depending on the `only_name` parameter.
+    """
+    datapacks_folder = os.path.join(path, 'modrinth_updater', 'datapacks', 'wait_for_update')
+    if not os.path.exists(datapacks_folder):
+                    os.makedirs(datapacks_folder)
+    list_save_folders = []
+    for save in os.listdir(datapacks_folder):
+        save_with_path = os.path.join(datapacks_folder, save)
+        if os.path.isfile(save_with_path):
+            if only_name:
+                list_save_folders.append(os.path.basename(save_with_path))
+            else:
+                list_save_folders.append(save_with_path)
+    return list_save_folders
+
+def get_wait_for_update_datapacks(save_folder , only_name = False):
+    """
+    Retrieves a list of all datapacks in the 'wait_for_update' folder of the specified save folder.
+
+    This function scans the 'wait_for_update' folder within the specified save folder path 
+    and returns a list of either the full paths or just the file names of the datapacks found.
+
+    Args:
+        save_folder (str): The path to the save folder.
+        only_name (bool, optional): If True, returns only the datapack file names. 
+                                    If False, returns the full paths. Defaults to False.
+
+    Returns:
+        list: A list of datapack file names or full paths depending on the `only_name` parameter.
+    """
+    datapacks_folder_path = os.path.join(save_folder, 'datapacks')
+    datapacks = []
+    for datapack in os.listdir(datapacks_folder_path):
         datapacks_with_path = os.path.join(save_folder, datapack)
         if os.path.isfile(datapacks_with_path):
             if only_name:

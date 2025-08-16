@@ -30,7 +30,7 @@ def check_updateable_shaderpacks(shaderpacks_path, game_versions=None, loaders=N
         loader_version = get_current_fabric_version()
         latest_mod_version = fix_version_number(data['game_versions'])
         curret_mod_version = fix_version_number(get_local_version(sha1_hash))
-        if latest_mod_version == curret_mod_version:
+        if latest_mod_version in curret_mod_version:
             print (f'✅ Your shaderpack is on the latest release: {shaderpacks_name}! Your loader is {loaders}-{loader_version}.')
         elif latest_mod_version > curret_mod_version:
             print('🚀 A newer version is available of this shaderpack!')
@@ -87,7 +87,7 @@ def check_wait_for_update_shaderpacks(shaderpacks_path, game_versions=None, load
         loader_version = get_current_fabric_version()
         latest_mod_version = fix_version_number(data['game_versions'])
         curret_mod_version = fix_version_number(get_local_version(sha1_hash))
-        if latest_mod_version == curret_mod_version:
+        if latest_mod_version in curret_mod_version:
             print (f'✅ Your shaderpack is on the latest release: {shaderpacks_name}! Your loader is {loaders}-{loader_version}.')
         elif latest_mod_version > curret_mod_version:
             print('🚀 A newer version is available of this shaderpack!')

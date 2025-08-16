@@ -31,7 +31,7 @@ def check_updateable_mods(mod_path, game_versions=None, loaders=None):
         loader_version = get_current_fabric_version()
         latest_mod_version = fix_version_number(data['game_versions'])
         curret_mod_version = fix_version_number(get_local_version(sha1_hash))
-        if latest_mod_version == curret_mod_version:
+        if latest_mod_version in curret_mod_version:
             print (f'✅ Your mod is on the latest release: {mod_name}! Your loader is {loaders}-{loader_version}.')
         elif latest_mod_version > curret_mod_version or loader_version < curret_mod_version:
             print('🚀 A newer version is available of this mod!')
@@ -92,7 +92,7 @@ def check_wait_for_update_mods(mod_path, game_versions=None, loaders=None):
         loader_version = get_current_fabric_version()
         latest_mod_version = fix_version_number(data['game_versions'])
         curret_mod_version = fix_version_number(get_local_version(sha1_hash))
-        if latest_mod_version == curret_mod_version:
+        if latest_mod_version in curret_mod_version:
             print (f'✅ Your mod is on the latest release: {mod_name}! Your loader is {loaders}-{loader_version}.')
         elif latest_mod_version > curret_mod_version or loader_version < curret_mod_version:
             print('🚀 A newer version is available of this mod!')

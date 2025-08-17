@@ -3,17 +3,22 @@ from modrinth_updater.config import (
     default_minecraft_path,
     env_run_mods_update,
     env_run_resourepacks_update,
-    env_run_shaderpacks_update
+    env_run_shaderpacks_update,
+    env_run_datapacks_update
 )
 from modrinth_updater.file_utils import (
     get_all_local_mods,
     get_all_resource_packs,
     get_all_shaderpacks,
+    get_all_save_folder,
+    get_all_datapacks,
     get_wait_for_update_mods,
     get_wait_for_update_resource_packs,
     get_wait_for_update_shaderpacks,
+    get_wait_for_update_save_folder,
+    get_wait_for_update_datapacks,
     get_current_fabric_version,
-    get_current_loader
+    get_current_loader,
 )
 from modrinth_updater.services.mods import (
     check_updateable_mods,
@@ -55,11 +60,11 @@ def update():
 
     # mods update
     if env_run_mods_update == "true":
-        wait_for_update_mods = get_wait_for_update_mods()
-        wait_for_update_mods_folder = os.path.join(default_minecraft_path, 'modrinth_updater', 'mods', 'wait_for_update' )
         # if exist the wait_for_update mods folder and it has files
         if os.path.exists(wait_for_update_mods_folder) and os.listdir(wait_for_update_mods_folder):
             print('❗️ Checking updateable mods in the wait_for_update folder...')
+            wait_for_update_mods = get_wait_for_update_mods()
+            wait_for_update_mods_folder = os.path.join(default_minecraft_path, 'modrinth_updater', 'mods', 'wait_for_update' )
             for mod_file in wait_for_update_mods:
                 wait_for_update_mod = check_wait_for_update_mods(mod_file, loader_version, loader)
                 if wait_for_update_mod:
@@ -76,11 +81,11 @@ def update():
 
     # resourcepacks update
     if env_run_resourepacks_update == "true":
-        wait_for_update_resource_packs = get_wait_for_update_resource_packs()
-        wait_for_update_resourcepacks_folder = os.path.join(default_minecraft_path, 'modrinth_updater', 'resourcepacks', 'wait_for_update' )
         # if exist the wait_for_update resourcepacks folder and it has files
         if os.path.exists(wait_for_update_resourcepacks_folder) and os.listdir(wait_for_update_resourcepacks_folder):
             print('❗️ Checking updateable resource packs in the wait_for_update folder...')
+            wait_for_update_resource_packs = get_wait_for_update_resource_packs()
+            wait_for_update_resourcepacks_folder = os.path.join(default_minecraft_path, 'modrinth_updater', 'resourcepacks', 'wait_for_update' )
             for resource_pack_file in wait_for_update_resource_packs:
                 wait_for_update_resource_pack = check_wait_for_update_resourcepacks(resource_pack_file, loader_version, None)
                 if wait_for_update_resource_pack:
@@ -97,11 +102,11 @@ def update():
 
     # shaderpacks update
     if env_run_shaderpacks_update == "true":
-        wait_for_update_shaderpacks = get_wait_for_update_shaderpacks()
-        wait_for_update_shaderpacks_folder = os.path.join(default_minecraft_path, 'modrinth_updater', 'shaderpacks', 'wait_for_update' )
         # if exist the wait_for_update shaderpacks folder and it has files
         if os.path.exists(wait_for_update_shaderpacks_folder) and os.listdir(wait_for_update_shaderpacks_folder):
             print('❗️ Checking updateable shaderpacks in the wait_for_update folder...')
+            wait_for_update_shaderpacks = get_wait_for_update_shaderpacks()
+            wait_for_update_shaderpacks_folder = os.path.join(default_minecraft_path, 'modrinth_updater', 'shaderpacks', 'wait_for_update' )
             for shaderpack_file in wait_for_update_shaderpacks:
                 wait_for_update_shaderpacks = check_wait_for_update_shaderpacks(shaderpack_file, loader_version, None)
                 if wait_for_update_shaderpacks:

@@ -21,48 +21,50 @@ def check_updateable_shaderpacks(shaderpacks_path, game_versions=None, loaders=N
     backup_folder = os.path.join(default_minecraft_path, 'modrinth_updater', 'shaderpacks', 'backup' )
     backup_path = os.path.join(default_minecraft_path, 'modrinth_updater', 'shaderpacks', 'backup', os.path.basename(shaderpacks_path))
     shaderpacks_folder = os.path.join(default_minecraft_path, 'shaderpacks')
-    response, loader_version, loaders, sha1_hash = check_update(shaderpacks_path, game_versions, loaders)
-    shaderpacks_name = os.path.basename(shaderpacks_path)
-    if response is None:
-        print(f'⚠️ Cannot update this shaderpack: {shaderpacks_name} because the update check failed.')
-    if response.status_code == HTTPStatus.OK:
-        data = response.json()
-        loader_version = get_current_fabric_version()
-        latest_mod_version = fix_version_number(data['game_versions'])
-        curret_mod_version = fix_version_number(get_local_version(sha1_hash))
-        if latest_mod_version in curret_mod_version:
-            print (f'✅ Your shaderpack is on the latest release: {shaderpacks_name}! Your loader is {loaders}-{loader_version}.')
-        elif latest_mod_version > curret_mod_version:
-            print('🚀 A newer version is available of this shaderpack!')
-            print(f"Name: {data['name']}")
-            if not os.path.exists(backup_folder):
-                os.makedirs(backup_folder)
-            try:
-                download_mod(data['files'][0]['url'],shaderpacks_folder)
-                print('⬇️ Latest version of the shaderpack has been downloaded!')
+    version, response_status_code = get_local_version(shaderpacks_path, game_versions)
+    if response_status_code ==HTTPStatus.OK:
+        response, loader_version, loaders = check_update(shaderpacks_path, game_versions, loaders)
+        shaderpacks_name = os.path.basename(shaderpacks_path)
+        if response is None:
+            print(f'⚠️ Cannot update this shaderpack: {shaderpacks_name} because the update check failed.')
+        if response.status_code == HTTPStatus.OK:
+            data = response.json()
+            loader_version = get_current_fabric_version()
+            latest_mod_version = fix_version_number(data['game_versions'])
+            current_mod_version = fix_version_number(version[0])
+            if latest_mod_version in current_mod_version:
+                print (f'✅ Your shaderpack is on the latest release: {shaderpacks_name}! Your loader is {loaders}-{loader_version}.')
+            elif latest_mod_version > current_mod_version:
+                print('🚀 A newer version is available of this shaderpack!')
+                print(f"Name: {data['name']}")
+                if not os.path.exists(backup_folder):
+                    os.makedirs(backup_folder)
                 try:
-                    shutil.move(shaderpacks_path, backup_path)
-                    print('📦 Old shaderpack file moved to the backup folder!')
+                    download_mod(data['files'][0]['url'],shaderpacks_folder)
+                    print('⬇️ Latest version of the shaderpack has been downloaded!')
+                    try:
+                        shutil.move(shaderpacks_path, backup_path)
+                        print('📦 Old shaderpack file moved to the backup folder!')
+                    except Exception as e:
+                        error = (f'Error moving file: {e}')
+                        return error
                 except Exception as e:
-                    error = (f'Error moving file: {e}')
+                    error = (f'Error downloading file: {e}')
                     return error
+        elif response.status_code == HTTPStatus.NOT_FOUND:
+            try:
+                wait_for_update_folder = os.path.join(default_minecraft_path, 'modrinth_updater', 'shaderpacks', 'wait_for_update' )
+                wait_for_update_path = os.path.join(default_minecraft_path, 'modrinth_updater', 'shaderpacks', 'wait_for_update', os.path.basename(shaderpacks_path) )
+                if not os.path.exists(wait_for_update_folder):
+                    os.makedirs(wait_for_update_folder)
+                shutil.move(shaderpacks_path, wait_for_update_path)
+                print ("⚠️  The shaderpack moved to the 'modrinth_updater/shaderpacks/wait_for_update' folder because of incompatibility!")
             except Exception as e:
-                error = (f'Error downloading file: {e}')
+                error = (f'Error moving file: {e}')
                 return error
-    elif response.status_code == HTTPStatus.NOT_FOUND:
-        try:
-            wait_for_update_folder = os.path.join(default_minecraft_path, 'modrinth_updater', 'shaderpacks', 'wait_for_update' )
-            wait_for_update_path = os.path.join(default_minecraft_path, 'modrinth_updater', 'shaderpacks', 'wait_for_update', os.path.basename(shaderpacks_path) )
-            if not os.path.exists(wait_for_update_folder):
-                os.makedirs(wait_for_update_folder)
-            shutil.move(shaderpacks_path, wait_for_update_path)
-            print ("⚠️  The shaderpack moved to the 'modrinth_updater/shaderpacks/wait_for_update' folder because of incompatibility!")
-        except Exception as e:
-            error = (f'Error moving file: {e}')
-            return error
-    else:
-        print(f'⚠️  Error: {response.status_code}')
-        print(response.text)
+        else:
+            print(f'⚠️  Error: {response.status_code}')
+            print(response.text)
 
 def check_wait_for_update_shaderpacks(shaderpacks_path, game_versions=None, loaders=None):
     """
@@ -80,34 +82,36 @@ def check_wait_for_update_shaderpacks(shaderpacks_path, game_versions=None, load
     backup_folder = os.path.join(default_minecraft_path, 'modrinth_updater', 'shaderpacks', 'backup' )
     backup_path = os.path.join(default_minecraft_path, 'modrinth_updater', 'shaderpacks', 'backup', os.path.basename(shaderpacks_path))
     shaderpacks_folder = os.path.join(default_minecraft_path, 'shaderpacks')
-    response, loader_version, loaders, sha1_hash = check_update(shaderpacks_path, game_versions, loaders)
-    shaderpacks_name = os.path.basename(shaderpacks_path)
-    if response.status_code == HTTPStatus.OK:
-        data = response.json()
-        loader_version = get_current_fabric_version()
-        latest_mod_version = fix_version_number(data['game_versions'])
-        curret_mod_version = fix_version_number(get_local_version(sha1_hash))
-        if latest_mod_version in curret_mod_version:
-            print (f'✅ Your shaderpack is on the latest release: {shaderpacks_name}! Your loader is {loaders}-{loader_version}.')
-        elif latest_mod_version > curret_mod_version:
-            print('🚀 A newer version is available of this shaderpack!')
-            print(f"Name: {data['name']}")
-            if not os.path.exists(backup_folder):
-                os.makedirs(backup_folder)
-            try:
-                download_mod(data['files'][0]['url'],shaderpacks_folder)
-                print('⬇️ Latest version of the shaderpack has been downloaded!')
+    version, response_status_code = get_local_version(shaderpacks_path, game_versions)
+    if response_status_code ==HTTPStatus.OK:
+        response, loader_version, loaders = check_update(shaderpacks_path, game_versions, loaders)
+        shaderpacks_name = os.path.basename(shaderpacks_path)
+        if response.status_code == HTTPStatus.OK:
+            data = response.json()
+            loader_version = get_current_fabric_version()
+            latest_mod_version = fix_version_number(data['game_versions'])
+            current_mod_version = fix_version_number(version)
+            if latest_mod_version in current_mod_version:
+                print (f'✅ Your shaderpack is on the latest release: {shaderpacks_name}! Your loader is {loaders}-{loader_version}.')
+            elif latest_mod_version > current_mod_version:
+                print('🚀 A newer version is available of this shaderpack!')
+                print(f"Name: {data['name']}")
+                if not os.path.exists(backup_folder):
+                    os.makedirs(backup_folder)
                 try:
-                    shutil.move(shaderpacks_path, backup_path)
-                    print('📦 Old shaderpack file moved to the backup folder!')
+                    download_mod(data['files'][0]['url'],shaderpacks_folder)
+                    print('⬇️ Latest version of the shaderpack has been downloaded!')
+                    try:
+                        shutil.move(shaderpacks_path, backup_path)
+                        print('📦 Old shaderpack file moved to the backup folder!')
+                    except Exception as e:
+                        error = (f'Error moving file: {e}')
+                        return error
                 except Exception as e:
-                    error = (f'Error moving file: {e}')
+                    error = (f'Error downloading file: {e}')
                     return error
-            except Exception as e:
-                error = (f'Error downloading file: {e}')
-                return error
-    elif response.status_code == HTTPStatus.NOT_FOUND:
-        return
-    else:
-        print(f'⚠️  Error: {response.status_code}')
-        print(response.text)
+        elif response.status_code == HTTPStatus.NOT_FOUND:
+            return
+        else:
+            print(f'⚠️  Error: {response.status_code}')
+            print(response.text)

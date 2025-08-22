@@ -34,7 +34,7 @@ def get_latest_mod_versions(mod_project_id):
     except requests.exceptions.RequestException as e:
         print(f'An error occurred: {e}')
 
-def get_local_version(hashed_file):
+def get_local_version(file_path, game_version):
     """
     Retrieves the version of a mod by sending a GET request to the Modrinth API with the provided file hash.
 
@@ -44,22 +44,27 @@ def get_local_version(hashed_file):
     Returns:
         str or requests.Response: The version string of the mod, or an error message if the mod could not be found or an error occurred.
     """
+    hashed_file = get_sha1_hash(file_path)
     url = f'{MODRINTH_API_BASE}/version_file/{hashed_file}'
     try:
         response = requests.get(url, timeout=15)
         if response.status_code == HTTPStatus.OK:
             data = response.json()
-            return data['game_versions']
+            if game_version in data['game_versions']:
+                return game_version, response.status_code
         elif response.status_code == HTTPStatus.NOT_FOUND:
-            print (f'❌ Cannot find the mod with the hash: {hashed_file}')
+            print (f'⚠️  Cannot find the mod with the hash: {hashed_file}. Your mod file can be corrupted, donwload it again.')
+            return [], response.status_code
         else:
-            print(f'  Error: {response.status_code}')
             print(response.text)
-            return response
+            print(f'⚠️ Error: {response.status_code}')
+            return [], response.status_code
     except requests.exceptions.Timeout:
-        print('The request timed out!')
+        print('⚠️ The request timed out!')
+        return [], None
     except requests.exceptions.RequestException as e:
-        print(f'An error occurred: {e}')
+        print(f'⚠️ An error occurred: {e}')
+        return [], None
 
 def check_update(path, game_versions=None, loaders=None):
     """
@@ -93,10 +98,10 @@ def check_update(path, game_versions=None, loaders=None):
     try:
         response = requests.post(url, json=body, headers=headers, timeout=15)
         response.raise_for_status()
-        return response, loader_version, loaders, sha1_hash
+        return response, loader_version, loaders
     except requests.exceptions.Timeout:
         print('The request timed out!')
-        return response, loader_version, loaders, sha1_hash
+        return response, loader_version, loaders
     except requests.exceptions.RequestException:
         print (f'❌ There is no update for {os.path.basename(path)} your loader is {loaders}-{game_versions}.')
-        return response, loader_version, loaders, sha1_hash
+        return response, loader_version, loaders

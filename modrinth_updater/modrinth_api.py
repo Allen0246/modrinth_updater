@@ -34,7 +34,7 @@ def get_latest_mod_versions(mod_project_id):
     except requests.exceptions.RequestException as e:
         print(f'An error occurred: {e}')
 
-def get_local_version(file_path, game_version):
+def get_local_version(file_path):
     """
     Retrieves the version of a mod by sending a GET request to the Modrinth API with the provided file hash.
 
@@ -50,8 +50,7 @@ def get_local_version(file_path, game_version):
         response = requests.get(url, timeout=15)
         if response.status_code == HTTPStatus.OK:
             data = response.json()
-            if game_version in data['game_versions']:
-                return game_version, response.status_code
+            return data['game_versions'], response.status_code
         elif response.status_code == HTTPStatus.NOT_FOUND:
             print (f'⚠️  Cannot find the mod with the hash: {hashed_file}. Your mod file can be corrupted, donwload it again.')
             return [], response.status_code

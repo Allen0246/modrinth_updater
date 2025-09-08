@@ -45,6 +45,8 @@ def fix_version_number(game_versions):
         str: The highest version number without any snapshot versions, or an error message if an error occurred.
     """
     try:
+        if isinstance(game_versions, str):
+            game_versions = [game_versions]
         with_out_snapshot = [v for v in game_versions if 'w' not in v.lower()]
         return max(with_out_snapshot, key=Version)
     except Exception as e:

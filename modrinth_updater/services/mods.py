@@ -22,20 +22,19 @@ def check_updateable_mods(mod_path, game_versions=None, loaders=None):
     backup_folder = os.path.join(default_minecraft_path, 'modrinth_updater', 'mods', 'backup' )
     backup_path = os.path.join(default_minecraft_path, 'modrinth_updater', 'mods' ,'backup', os.path.basename(mod_path))
     mods_folder = os.path.join(default_minecraft_path, 'mods')
-    version, response_status_code = get_local_version(mod_path, game_versions)
-    if response_status_code ==HTTPStatus.OK:
+    local_mod_versions, response_status_code = get_local_version(mod_path)
+    if response_status_code == HTTPStatus.OK:
         response, loader_version, loaders = check_update(mod_path, game_versions, loaders)
         mod_name = os.path.basename(mod_path)
         if response is None:
             print(f'⚠️ Cannot update this mod: {mod_name} because the update check failed.')
         if response.status_code == HTTPStatus.OK:
             data = response.json()
-            loader_version = get_current_fabric_version()
             latest_mod_version = fix_version_number(data['game_versions'])
-            current_mod_version = fix_version_number(version[0])
-            if latest_mod_version in current_mod_version:
+            local_mod_version = fix_version_number(local_mod_versions)
+            if local_mod_version in latest_mod_version:
                 print (f'✅ Your mod is on the latest release: {mod_name}! Your loader is {loaders}-{loader_version}.')
-            elif latest_mod_version > current_mod_version or loader_version < current_mod_version:
+            elif latest_mod_version > local_mod_version:
                 print('🚀 A newer version is available of this mod!')
                 print(f"Name: {data['name']}")
                 if not os.path.exists(backup_folder):
@@ -85,7 +84,7 @@ def check_wait_for_update_mods(mod_path, game_versions=None, loaders=None):
     backup_folder = os.path.join(default_minecraft_path, 'modrinth_updater', 'mods', 'backup' )
     backup_path = os.path.join(default_minecraft_path, 'modrinth_updater', 'mods', 'backup', os.path.basename(mod_path))
     mods_folder = os.path.join(default_minecraft_path, 'mods')
-    version, response_status_code = get_local_version(mod_path, game_versions)
+    local_mod_versions, response_status_code = get_local_version(mod_path)
     if response_status_code ==HTTPStatus.OK:
         response, loader_version, loaders = check_update(mod_path, game_versions, loaders)
         mod_name = os.path.basename(mod_path)
@@ -93,12 +92,11 @@ def check_wait_for_update_mods(mod_path, game_versions=None, loaders=None):
             print("⚠️ Cannot update this mod because the update check failed.")
         if response.status_code == HTTPStatus.OK:
             data = response.json()
-            loader_version = get_current_fabric_version()
             latest_mod_version = fix_version_number(data['game_versions'])
-            current_mod_version = fix_version_number(version[0])
-            if latest_mod_version in current_mod_version:
+            local_mod_version = fix_version_number(local_mod_versions)
+            if local_mod_version in latest_mod_version:
                 print (f'✅ Your mod is on the latest release: {mod_name}! Your loader is {loaders}-{loader_version}.')
-            elif latest_mod_version > current_mod_version or loader_version < current_mod_version:
+            elif latest_mod_version > local_mod_version:
                 print('🚀 A newer version is available of this mod!')
                 print(f"Name: {data['name']}")
                 if not os.path.exists(backup_folder):

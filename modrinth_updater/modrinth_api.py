@@ -45,6 +45,7 @@ def get_local_version(file_path):
         str or requests.Response: The version string of the mod, or an error message if the mod could not be found or an error occurred.
     """
     hashed_file = get_sha1_hash(file_path)
+    mod_name = os.path.basename(file_path)
     url = f'{MODRINTH_API_BASE}/version_file/{hashed_file}'
     try:
         response = requests.get(url, timeout=15)
@@ -52,7 +53,7 @@ def get_local_version(file_path):
             data = response.json()
             return data['game_versions'], response.status_code
         elif response.status_code == HTTPStatus.NOT_FOUND:
-            print (f'⚠️  Cannot find the mod with the hash: {hashed_file}. Your mod file can be corrupted, donwload it again.')
+            print (f'⚠️  Cannot find the mod with the hash: {hashed_file}. Your mod file "{mod_name}" can be corrupted, donwload it again.')
             return [], response.status_code
         else:
             print(response.text)

@@ -51,20 +51,20 @@ def get_local_version(file_path):
         response = requests.get(url, timeout=15)
         if response.status_code == HTTPStatus.OK:
             data = response.json()
-            return data['game_versions'], response.status_code
+            return data['game_versions'], data['version_number'], response.status_code
         elif response.status_code == HTTPStatus.NOT_FOUND:
             print (f'⚠️  Cannot find the mod with the hash: {hashed_file}. Your mod file "{mod_name}" can be corrupted, donwload it again.')
-            return [], response.status_code
+            return [], [], response.status_code
         else:
             print(response.text)
             print(f'⚠️ Error: {response.status_code}')
-            return [], response.status_code
+            return [], [], response.status_code
     except requests.exceptions.Timeout:
         print('⚠️ The request timed out!')
-        return [], None
+        return [], [], None
     except requests.exceptions.RequestException as e:
         print(f'⚠️ An error occurred: {e}')
-        return [], None
+        return [], [], None
 
 def check_update(path, game_versions=None, loaders=None):
     """

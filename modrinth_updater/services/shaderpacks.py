@@ -1,9 +1,10 @@
 import os
 import shutil
 from http import HTTPStatus
+from packaging.version import Version
 from modrinth_updater.config import default_minecraft_path
 from modrinth_updater.modrinth_api import check_update, get_local_version
-from modrinth_updater.file_utils import fix_version_number, download_mod, get_current_fabric_version
+from modrinth_updater.file_utils import fix_game_version_number, fix_version_number, download_mod
 
 def check_updateable_shaderpacks(shaderpacks_path, game_versions=None, loaders=None):
     """
@@ -21,7 +22,7 @@ def check_updateable_shaderpacks(shaderpacks_path, game_versions=None, loaders=N
     backup_folder = os.path.join(default_minecraft_path, 'modrinth_updater', 'shaderpacks', 'backup' )
     backup_path = os.path.join(default_minecraft_path, 'modrinth_updater', 'shaderpacks', 'backup', os.path.basename(shaderpacks_path))
     shaderpacks_folder = os.path.join(default_minecraft_path, 'shaderpacks')
-    local_mod_versions, response_status_code = get_local_version(shaderpacks_path)
+    local_shaderpack_versions, local_version_number, response_status_code = get_local_version(shaderpacks_path)
     if response_status_code ==HTTPStatus.OK:
         response, loader_version, loaders = check_update(shaderpacks_path, game_versions, loaders)
         shaderpacks_name = os.path.basename(shaderpacks_path)
@@ -29,11 +30,13 @@ def check_updateable_shaderpacks(shaderpacks_path, game_versions=None, loaders=N
             print(f'⚠️ Cannot update this shaderpack: {shaderpacks_name} because the update check failed.')
         if response.status_code == HTTPStatus.OK:
             data = response.json()
-            latest_mod_version = fix_version_number(data['game_versions'])
-            local_mod_version = fix_version_number(local_mod_versions)
-            if local_mod_version in latest_mod_version:
+            latest_shaderpack_version = fix_game_version_number(data['game_versions'])
+            local_shaderpack_version = fix_game_version_number(local_shaderpack_versions)
+            fixed_latest_version_number = fix_version_number(data['version_number'])
+            fixed_local_version_number = fix_version_number(local_version_number)
+            if latest_shaderpack_version in local_shaderpack_version and fixed_latest_version_number == fixed_local_version_number:
                 print (f'✅ Your shaderpack is on the latest release: {shaderpacks_name}! Your loader is {loaders}-{loader_version}.')
-            elif latest_mod_version > local_mod_version:
+            elif latest_shaderpack_version > local_shaderpack_version or Version(fixed_latest_version_number) > Version(fixed_local_version_number):
                 print('🚀 A newer version is available of this shaderpack!')
                 print(f"Name: {data['name']}")
                 if not os.path.exists(backup_folder):
@@ -81,17 +84,19 @@ def check_wait_for_update_shaderpacks(shaderpacks_path, game_versions=None, load
     backup_folder = os.path.join(default_minecraft_path, 'modrinth_updater', 'shaderpacks', 'backup' )
     backup_path = os.path.join(default_minecraft_path, 'modrinth_updater', 'shaderpacks', 'backup', os.path.basename(shaderpacks_path))
     shaderpacks_folder = os.path.join(default_minecraft_path, 'shaderpacks')
-    local_mod_versions, response_status_code = get_local_version(shaderpacks_path)
+    local_shaderpack_versions, local_version_number, response_status_code = get_local_version(shaderpacks_path)
     if response_status_code ==HTTPStatus.OK:
         response, loader_version, loaders = check_update(shaderpacks_path, game_versions, loaders)
         shaderpacks_name = os.path.basename(shaderpacks_path)
         if response.status_code == HTTPStatus.OK:
             data = response.json()
-            latest_mod_version = fix_version_number(data['game_versions'])
-            local_mod_version = fix_version_number(local_mod_versions)
-            if local_mod_version in latest_mod_version:
+            latest_shaderpack_version = fix_game_version_number(data['game_versions'])
+            local_shaderpack_version = fix_game_version_number(local_shaderpack_versions)
+            fixed_latest_version_number = fix_version_number(data['version_number'])
+            fixed_local_version_number = fix_version_number(local_version_number)
+            if latest_shaderpack_version in local_shaderpack_version and fixed_latest_version_number == fixed_local_version_number:
                 print (f'✅ Your shaderpack is on the latest release: {shaderpacks_name}! Your loader is {loaders}-{loader_version}.')
-            elif latest_mod_version > local_mod_version:
+            elif latest_shaderpack_version > local_shaderpack_version or Version(fixed_latest_version_number) > Version(fixed_local_version_number):
                 print('🚀 A newer version is available of this shaderpack!')
                 print(f"Name: {data['name']}")
                 if not os.path.exists(backup_folder):

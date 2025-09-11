@@ -34,7 +34,7 @@ def download_mod(url, save_folder, mod_name=None):
         error = (f'Error downloading file: {e}')
         return error
 
-def fix_version_number(game_versions):
+def fix_game_version_number(game_versions):
     """
     Removes any snapshot versions from a list of game versions and returns the highest version number.
 
@@ -51,6 +51,21 @@ def fix_version_number(game_versions):
         return max(with_out_snapshot, key=Version)
     except Exception as e:
         print(f'An error occurred with versioning: {e}')
+
+def fix_version_number(version):
+    """
+    Splits a version number into its base and any additional extras.
+    
+    Args:
+        version (str): The version number to split.
+    
+    Returns:
+        tuple: A tuple containing the base version number and a list of any additional extras.
+    """
+    if "+" in version:
+        base, *extras = version.split("+")
+        return base, extras
+    return version, []
 
 def get_current_fabric_version(path = default_minecraft_path):
     """

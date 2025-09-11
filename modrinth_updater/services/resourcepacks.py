@@ -1,9 +1,10 @@
 import os
 import shutil
 from http import HTTPStatus
+from packaging.version import Version
 from modrinth_updater.config import default_minecraft_path
 from modrinth_updater.modrinth_api import check_update, get_local_version
-from modrinth_updater.file_utils import fix_version_number, download_mod, get_current_fabric_version
+from modrinth_updater.file_utils import fix_game_version_number, fix_version_number,download_mod
 
 def check_updateable_resourcepacks(resourcepacks_path, game_versions=None, loaders=None):
     """
@@ -21,7 +22,7 @@ def check_updateable_resourcepacks(resourcepacks_path, game_versions=None, loade
     backup_folder = os.path.join(default_minecraft_path, 'modrinth_updater', 'resourcepacks', 'backup' )
     backup_path = os.path.join(default_minecraft_path, 'modrinth_updater', 'resourcepacks', 'backup', os.path.basename(resourcepacks_path))
     resourcepacks_folder = os.path.join(default_minecraft_path, 'resourcepacks')
-    local_mod_versions, response_status_code = get_local_version(resourcepacks_path)
+    local_resourcepack_versions, local_version_number, response_status_code = get_local_version(resourcepacks_path)
     if response_status_code ==HTTPStatus.OK:
         response, loader_version, loaders = check_update(resourcepacks_path, game_versions, loaders)
         resourcepack_name = os.path.basename(resourcepacks_path)
@@ -29,11 +30,13 @@ def check_updateable_resourcepacks(resourcepacks_path, game_versions=None, loade
             print(f'⚠️ Cannot update this resource pack: {resourcepack_name} because the update check failed.')
         if response.status_code == HTTPStatus.OK:
             data = response.json()
-            latest_mod_version = fix_version_number(data['game_versions'])
-            local_mod_version = fix_version_number(local_mod_versions)
-            if local_mod_version in latest_mod_version:
+            latest_resourcepack_version = fix_game_version_number(data['game_versions'])
+            local_resourcepack_version = fix_game_version_number(local_resourcepack_versions)
+            fixed_latest_version_number = fix_version_number(data['version_number'])
+            fixed_local_version_number = fix_version_number(local_version_number)
+            if latest_resourcepack_version in latest_resourcepack_version and fixed_latest_version_number == fixed_local_version_number:
                 print (f'✅ Your resource pack is on the latest release: {resourcepack_name}! Your loader is {loaders}-{loader_version}.')
-            elif latest_mod_version > local_mod_version:
+            elif latest_resourcepack_version > local_resourcepack_version or Version(fixed_latest_version_number) > Version(fixed_local_version_number):
                 print('🚀 A newer version is available of this resource pack!')
                 print(f"Name: {data['name']}")
                 if not os.path.exists(backup_folder):
@@ -80,19 +83,21 @@ def check_wait_for_update_resourcepacks(resourcepacks_path, game_versions=None, 
     backup_folder = os.path.join(default_minecraft_path, 'modrinth_updater', 'resourcepacks', 'backup' )
     backup_path = os.path.join(default_minecraft_path, 'modrinth_updater', 'resourcepacks', 'backup', os.path.basename(resourcepacks_path))
     resourcepacks_folder = os.path.join(default_minecraft_path, 'resourcepacks')
-    local_mod_versions, response_status_code = get_local_version(resourcepacks_path)
+    local_resourcepack_versions, local_version_number, response_status_code = get_local_version(resourcepacks_path)
     if response_status_code ==HTTPStatus.OK:
         response, loader_version, loaders = check_update(resourcepacks_path, game_versions, loaders)
         resourcepack_name = os.path.basename(resourcepacks_path)
         if response is None:
-            print("⚠️ Cannot update this resurce pack because the update check failed.")
+            print(f'⚠️ Cannot update this mod "{resourcepack_name}" because the update check failed.')
         if response.status_code == HTTPStatus.OK:
             data = response.json()
-            latest_mod_version = fix_version_number(data['game_versions'])
-            local_mod_version = fix_version_number(local_mod_versions)
-            if local_mod_version in latest_mod_version:
+            latest_resourcepack_version = fix_game_version_number(data['game_versions'])
+            local_resourcepack_version = fix_game_version_number(local_resourcepack_versions)
+            fixed_latest_version_number = fix_version_number(data['version_number'])
+            fixed_local_version_number = fix_version_number(local_version_number)
+            if latest_resourcepack_version in latest_resourcepack_version and fixed_latest_version_number == fixed_local_version_number:
                 print (f'✅ Your resource pack is on the latest release: {resourcepack_name}! Your loader is {loaders}-{loader_version}.')
-            elif latest_mod_version > local_mod_version:
+            elif latest_resourcepack_version > local_resourcepack_version or Version(fixed_latest_version_number) > Version(fixed_local_version_number):
                 print('🚀 A newer version is available of this resource pack!')
                 print(f"Name: {data['name']}")
                 if not os.path.exists(backup_folder):

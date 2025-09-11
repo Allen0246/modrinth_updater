@@ -1,10 +1,10 @@
 import os
 import shutil
 from http import HTTPStatus
+from packaging.version import Version
 from modrinth_updater.config import default_minecraft_path
 from modrinth_updater.modrinth_api import check_update, get_local_version
-from modrinth_updater.file_utils import fix_version_number, download_mod, get_current_fabric_version
-from modrinth_updater.hash_utils import get_sha1_hash
+from modrinth_updater.file_utils import fix_game_version_number, fix_version_number, download_mod
 
 def check_updateable_mods(mod_path, game_versions=None, loaders=None):
     """
@@ -22,7 +22,7 @@ def check_updateable_mods(mod_path, game_versions=None, loaders=None):
     backup_folder = os.path.join(default_minecraft_path, 'modrinth_updater', 'mods', 'backup' )
     backup_path = os.path.join(default_minecraft_path, 'modrinth_updater', 'mods' ,'backup', os.path.basename(mod_path))
     mods_folder = os.path.join(default_minecraft_path, 'mods')
-    local_mod_versions, response_status_code = get_local_version(mod_path)
+    local_mod_versions, local_version_number, response_status_code = get_local_version(mod_path)
     if response_status_code == HTTPStatus.OK:
         response, loader_version, loaders = check_update(mod_path, game_versions, loaders)
         mod_name = os.path.basename(mod_path)
@@ -30,11 +30,13 @@ def check_updateable_mods(mod_path, game_versions=None, loaders=None):
             print(f'⚠️ Cannot update this mod: {mod_name} because the update check failed.')
         if response.status_code == HTTPStatus.OK:
             data = response.json()
-            latest_mod_version = fix_version_number(data['game_versions'])
-            local_mod_version = fix_version_number(local_mod_versions)
-            if local_mod_version in latest_mod_version:
+            latest_mod_version = fix_game_version_number(data['game_versions'])
+            local_mod_version = fix_game_version_number(local_mod_versions)
+            fixed_latest_version_number, _ = fix_version_number(data['version_number'])
+            fixed_local_version_number, _ = fix_version_number(local_version_number)
+            if local_mod_version in latest_mod_version and fixed_latest_version_number == fixed_local_version_number:
                 print (f'✅ Your mod is on the latest release: {mod_name}! Your loader is {loaders}-{loader_version}.')
-            elif latest_mod_version > local_mod_version:
+            elif latest_mod_version > local_mod_version or Version(fixed_latest_version_number) > Version(fixed_local_version_number):
                 print('🚀 A newer version is available of this mod!')
                 print(f"Name: {data['name']}")
                 if not os.path.exists(backup_folder):
@@ -84,19 +86,21 @@ def check_wait_for_update_mods(mod_path, game_versions=None, loaders=None):
     backup_folder = os.path.join(default_minecraft_path, 'modrinth_updater', 'mods', 'backup' )
     backup_path = os.path.join(default_minecraft_path, 'modrinth_updater', 'mods', 'backup', os.path.basename(mod_path))
     mods_folder = os.path.join(default_minecraft_path, 'mods')
-    local_mod_versions, response_status_code = get_local_version(mod_path)
+    local_mod_versions, local_version_number, response_status_code = get_local_version(mod_path)
     if response_status_code ==HTTPStatus.OK:
         response, loader_version, loaders = check_update(mod_path, game_versions, loaders)
         mod_name = os.path.basename(mod_path)
         if response is None:
-            print("⚠️ Cannot update this mod because the update check failed.")
+            print(f'⚠️ Cannot update this mod "{mod_name}" because the update check failed.')
         if response.status_code == HTTPStatus.OK:
             data = response.json()
-            latest_mod_version = fix_version_number(data['game_versions'])
-            local_mod_version = fix_version_number(local_mod_versions)
-            if local_mod_version in latest_mod_version:
+            latest_mod_version = fix_game_version_number(data['game_versions'])
+            local_mod_version = fix_game_version_number(local_mod_versions)
+            fixed_latest_version_number, _ = fix_version_number(data['version_number'])
+            fixed_local_version_number, _ = fix_version_number(local_version_number)
+            if local_mod_version in latest_mod_version and fixed_latest_version_number == fixed_local_version_number:
                 print (f'✅ Your mod is on the latest release: {mod_name}! Your loader is {loaders}-{loader_version}.')
-            elif latest_mod_version > local_mod_version:
+            elif latest_mod_version > local_mod_version or Version(fixed_latest_version_number) > Version(fixed_local_version_number):
                 print('🚀 A newer version is available of this mod!')
                 print(f"Name: {data['name']}")
                 if not os.path.exists(backup_folder):

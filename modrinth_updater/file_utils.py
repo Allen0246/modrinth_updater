@@ -1,4 +1,5 @@
 import os
+import re
 import urllib.parse
 import json
 from packaging.version import Version
@@ -33,6 +34,29 @@ def download_mod(url, save_folder, mod_name=None):
     except Exception as e:
         error = (f'Error downloading file: {e}')
         return error
+def fix_version_number(version):
+    """
+    Fixes a version string by removing any non-numeric characters and splitting it into
+    two parts: the game version and the mod version.
+
+    Args:
+        version (str): The version string to fix.
+
+    Returns:
+        tuple: A tuple containing the game version and the mod version.
+    """
+    if "+" in version:
+        # format: modversion+gameversion-loader
+        mod_version, rest = version.rsplit("+", 1)
+        game_version = re.sub(r'[a-zA-Z]+', '', rest.split("-")[0])
+        return game_version, mod_version
+    else:
+        # format: gameversion-modversion-loader
+        parts = re.sub(r'[a-zA-Z]+', '', version).split("-")
+        parts = [p for p in parts if p]
+        game_version = parts[0] if len(parts) > 0 else None
+        mod_version = parts[1] if len(parts) > 1 else None
+        return game_version, mod_version
 
 def fix_game_version_number(game_versions):
     """
@@ -51,21 +75,6 @@ def fix_game_version_number(game_versions):
         return max(with_out_snapshot, key=Version)
     except Exception as e:
         print(f'An error occurred with versioning: {e}')
-
-def fix_version_number(version):
-    """
-    Splits a version number into its base and any additional extras.
-    
-    Args:
-        version (str): The version number to split.
-    
-    Returns:
-        tuple: A tuple containing the base version number and a list of any additional extras.
-    """
-    if "+" in version:
-        base, *extras = version.split("+")
-        return base, extras
-    return version, []
 
 def get_current_fabric_version(path = default_minecraft_path):
     """

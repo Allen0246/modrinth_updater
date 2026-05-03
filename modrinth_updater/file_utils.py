@@ -48,11 +48,11 @@ def fix_version_number(version):
     if "+" in version:
         # format: modversion+gameversion-loader
         mod_version, rest = version.rsplit("+", 1)
-        game_version = re.sub(r'[a-zA-Z]+', '', rest.split("-")[0])
+        game_version = re.sub(r'[a-zA-Z]+\.?+', '', rest.split("-")[0])
         return game_version, mod_version
     else:
         # format: gameversion-modversion-loader
-        parts = re.sub(r'[a-zA-Z]+', '', version).split("-")
+        parts = re.sub(r'[a-zA-Z]+\.?+', '', version).split("-")
         parts = [p for p in parts if p]
         game_version = parts[0] if len(parts) > 0 else None
         mod_version = parts[1] if len(parts) > 1 else None
